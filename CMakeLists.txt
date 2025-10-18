@@ -1,19 +1,41 @@
-cmake_minimum_required (VERSION 3.8)
-project (vulkan_minimal_compute)
+cmake_minimum_required(VERSION 3.10)
 
-find_package(Vulkan)
+# Force MinGW toolchain before project()
+set(CMAKE_GENERATOR "MinGW Makefiles" CACHE INTERNAL "" FORCE)
+set(CMAKE_C_COMPILER "gcc" CACHE STRING "C compiler" FORCE)
+set(CMAKE_CXX_COMPILER "g++" CACHE STRING "C++ compiler" FORCE)
 
-# get rid of annoying MSVC warnings.
-add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+project(vulkan_minimal_compute)
 
-set (CMAKE_CXX_STANDARD 11)
+# Find Vulkan package
+find_package(Vulkan REQUIRED)
 
-include_directories(${Vulkan_INCLUDE_DIR})
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(ALL_LIBS  ${Vulkan_LIBRARY} )
+# GCC specific flags
+add_compile_options(-Wall -Wextra)
 
-add_executable(vulkan_minimal_compute src/main.cpp src/lodepng.cpp)
+# Include directories
+include_directories(${Vulkan_INCLUDE_DIRS})
 
-set_target_properties(vulkan_minimal_compute PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+# Define source files
+set(SOURCES
+    src/main.cpp
+    src/lodepng.cpp
+)
 
-target_link_libraries(vulkan_minimal_compute ${ALL_LIBS} )
+# Create executable
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+
+
+# Link libraries
+target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan)
+
+# Set working directory for debugging
+set_target_properties(${PROJECT_NAME} PROPERTIES 
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+)
